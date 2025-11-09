@@ -3,26 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Drag&Drop Ranker</title>
+<title>Ranker Drag & Drop Personalizzabile</title>
 <style>
   body {
     font-family: 'Poppins', sans-serif;
-    background: #f4f4f4;
+    background: #f0f2f5;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px;
+    padding: 20px;
   }
   h1 {
     color: #333;
+    text-align: center;
   }
   textarea {
-    width: 300px;
+    width: 90%;
+    max-width: 400px;
     height: 100px;
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 10px;
     margin-bottom: 10px;
+    font-size: 16px;
     resize: none;
   }
   button {
@@ -32,6 +35,7 @@
     color: white;
     border-radius: 8px;
     cursor: pointer;
+    font-size: 16px;
     transition: background 0.2s;
   }
   button:hover {
@@ -40,7 +44,8 @@
   ul {
     list-style: none;
     padding: 0;
-    width: 300px;
+    width: 90%;
+    max-width: 400px;
     margin-top: 20px;
   }
   li {
@@ -48,12 +53,20 @@
     margin: 6px 0;
     background: white;
     border-radius: 10px;
-    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
     cursor: grab;
-    transition: transform 0.1s;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    touch-action: none;
   }
-  li:active {
-    transform: scale(1.03);
+  li.dragging {
+    opacity: 0.6;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  }
+  li.drag-over {
+    border: 2px dashed #007bff;
+    background: #eaf2ff;
+    transform: translateY(4px);
   }
   #saveButton {
     display: none;
@@ -65,7 +78,8 @@
     border-radius: 10px;
     padding: 15px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    width: 300px;
+    width: 90%;
+    max-width: 400px;
     display: none;
   }
 </style>
@@ -104,19 +118,35 @@ generateButton.onclick = () => {
 rankList.addEventListener('dragstart', e => {
   if (e.target.tagName === 'LI') {
     dragged = e.target;
-    e.target.style.opacity = 0.5;
+    e.target.classList.add('dragging');
   }
 });
+
 rankList.addEventListener('dragend', e => {
-  e.target.style.opacity = '';
+  e.target.classList.remove('dragging');
 });
-rankList.addEventListener('dragover', e => e.preventDefault());
+
+rankList.addEventListener('dragover', e => {
+  e.preventDefault();
+  const target = e.target;
+  if (target.tagName === 'LI' && target !== dragged) {
+    target.classList.add('drag-over');
+  }
+});
+
+rankList.addEventListener('dragleave', e => {
+  if (e.target.tagName === 'LI') {
+    e.target.classList.remove('drag-over');
+  }
+});
+
 rankList.addEventListener('drop', e => {
   e.preventDefault();
   if (e.target.tagName === 'LI' && e.target !== dragged) {
     const items = Array.from(rankList.children);
     const draggedIndex = items.indexOf(dragged);
     const targetIndex = items.indexOf(e.target);
+    e.target.classList.remove('drag-over');
     if (draggedIndex < targetIndex)
       e.target.after(dragged);
     else
@@ -129,6 +159,33 @@ saveButton.onclick = () => {
   resultBox.innerHTML = `<h3>Ordine finale:</h3><ol>${finalOrder.map(x => `<li>${x}</li>`).join('')}</ol>`;
   resultBox.style.display = 'block';
 };
+
+// Supporto touch per mobile
+document.addEventListener('touchstart', e => {
+  if (e.target.tagName === 'LI') {
+    dragged = e.target;
+    e.target.classList.add('dragging');
+  }
+});
+
+document.addEventListener('touchmove', e => {
+  const touch = e.touches[0];
+  const element = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (element && element.tagName === 'LI' && element !== dragged) {
+    const items = Array.from(rankList.children);
+    const draggedIndex = items.indexOf(dragged);
+    const targetIndex = items.indexOf(element);
+    if (draggedIndex < targetIndex)
+      element.after(dragged);
+    else
+      element.before(dragged);
+  }
+});
+
+document.addEventListener('touchend', e => {
+  if (dragged) dragged.classList.remove('dragging');
+  dragged = null;
+});
 </script>
 </body>
 </html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drag&Drop Ranker</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+  }
+  h1 {
+    color: #333;
+  }
+  textarea {
+    width: 300px;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    resize: none;
+  }
+  button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    width: 300px;
+    margin-top: 20px;
+  }
+  li {
+    padding: 12px;
+    margin: 6px 0;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+    cursor: grab;
+    transition: transform 0.1s;
+  }
+  li:active {
+    transform: scale(1.03);
+  }
+  #saveButton {
+    display: none;
+    margin-top: 15px;
+  }
+  #resultBox {
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    width: 300px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+  <h1>Ranker Drag & Drop</h1>
+  <p>Inserisci una lista (una voce per riga):</p>
+  <textarea id="inputList" placeholder="Es:\nItalia\nSvezia\nFrancia\nCroazia"></textarea>
+  <button id="generate">Crea lista</button>
+  <ul id="rankList"></ul>
+  <button id="saveButton">Salva ordine</button>
+  <div id="resultBox"></div>
+
+<script>
+const generateButton = document.getElementById('generate');
+const inputList = document.getElementById('inputList');
+const rankList = document.getElementById('rankList');
+const saveButton = document.getElementById('saveButton');
+const resultBox = document.getElementById('resultBox');
+let dragged;
+
+generateButton.onclick = () => {
+  const items = inputList.value.trim().split('\n').filter(x => x.trim() !== '');
+  rankList.innerHTML = '';
+  if (items.length === 0) return;
+  items.forEach(text => {
+    const li = document.createElement('li');
+    li.textContent = text;
+    li.draggable = true;
+    rankList.appendChild(li);
+  });
+  saveButton.style.display = 'block';
+  resultBox.style.display = 'none';
+};
+
+rankList.addEventListener('dragstart', e => {
+  if (e.target.tagName === 'LI') {
+    dragged = e.target;
+    e.target.style.opacity = 0.5;
+  }
+});
+rankList.addEventListener('dragend', e => {
+  e.target.style.opacity = '';
+});
+rankList.addEventListener('dragover', e => e.preventDefault());
+rankList.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.target.tagName === 'LI' && e.target !== dragged) {
+    const items = Array.from(rankList.children);
+    const draggedIndex = items.indexOf(dragged);
+    const targetIndex = items.indexOf(e.target);
+    if (draggedIndex < targetIndex)
+      e.target.after(dragged);
+    else
+      e.target.before(dragged);
+  }
+});
+
+saveButton.onclick = () => {
+  const finalOrder = Array.from(rankList.children).map(li => li.textContent);
+  resultBox.innerHTML = `<h3>Ordine finale:</h3><ol>${finalOrder.map(x => `<li>${x}</li>`).join('')}</ol>`;
+  resultBox.style.display = 'block';
+};
+</script>
+</body>
+</html>

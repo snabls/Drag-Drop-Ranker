@@ -1,191 +1,374 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ranker Drag & Drop Personalizzabile</title>
-<style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #f0f2f5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
-  h1 {
-    color: #333;
-    text-align: center;
-  }
-  textarea {
-    width: 90%;
-    max-width: 400px;
-    height: 100px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    font-size: 16px;
-    resize: none;
-  }
-  button {
-    padding: 10px 20px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.2s;
-  }
-  button:hover {
-    background-color: #0056b3;
-  }
-  ul {
-    list-style: none;
-    padding: 0;
-    width: 90%;
-    max-width: 400px;
-    margin-top: 20px;
-  }
-  li {
-    padding: 12px;
-    margin: 6px 0;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    cursor: grab;
-    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-    touch-action: none;
-  }
-  li.dragging {
-    opacity: 0.6;
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-  }
-  li.drag-over {
-    border: 2px dashed #007bff;
-    background: #eaf2ff;
-    transform: translateY(4px);
-  }
-  #saveButton {
-    display: none;
-    margin-top: 15px;
-  }
-  #resultBox {
-    margin-top: 20px;
-    background: #fff;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    width: 90%;
-    max-width: 400px;
-    display: none;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranker Drag & Drop Personalizzabile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #111827;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    p {
+      color: #6b7280;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      max-width: 500px;
+      height: 120px;
+      padding: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      font-family: inherit;
+      resize: vertical;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+      max-width: 500px;
+      margin-top: 30px;
+    }
+
+    li {
+      padding: 16px;
+      margin: 10px 0;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s;
+      touch-action: none;
+      border: 1px solid transparent;
+    }
+
+    li:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    li.dragging {
+      opacity: 0.8;
+      transform: scale(1.02);
+      box-shadow: var(--shadow-lg);
+      z-index: 10;
+      cursor: grabbing;
+    }
+
+    li.drag-over {
+      border: 2px dashed var(--primary-color);
+      background: #eef2ff;
+      transform: scale(1.01);
+    }
+
+    li.locked {
+      cursor: default;
+      background-color: #f9fafb;
+      color: #6b7280;
+      box-shadow: none;
+      border: 1px solid #e5e7eb;
+    }
+
+    #saveButton {
+      display: none;
+      margin-top: 25px;
+      background-color: #10b981;
+    }
+
+    #saveButton:hover {
+      background-color: #059669;
+    }
+
+    #resultBox {
+      margin-top: 30px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 500px;
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    #resultBox h3 {
+      margin-top: 0;
+      color: #111827;
+    }
+
+    #resultBox ol {
+      padding-left: 20px;
+      margin-bottom: 0;
+    }
+
+    #resultBox li {
+      cursor: default;
+      box-shadow: none;
+      margin: 5px 0;
+      padding: 5px 0;
+      background: transparent;
+      border-radius: 0;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Mobile Optimization */
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 15px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      textarea,
+      ul,
+      #resultBox {
+        width: 100%;
+      }
+
+      li {
+        padding: 14px;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <h1>Ranker Drag & Drop</h1>
   <p>Inserisci una lista (una voce per riga):</p>
-  <textarea id="inputList" placeholder="Es:\nItalia\nSvezia\nFrancia\nCroazia"></textarea>
+  <textarea id="inputList"></textarea>
   <button id="generate">Crea lista</button>
   <ul id="rankList"></ul>
   <button id="saveButton">Salva ordine</button>
   <div id="resultBox"></div>
 
-<script>
-const generateButton = document.getElementById('generate');
-const inputList = document.getElementById('inputList');
-const rankList = document.getElementById('rankList');
-const saveButton = document.getElementById('saveButton');
-const resultBox = document.getElementById('resultBox');
-let dragged;
+  <script>
+    const generateButton = document.getElementById('generate');
+    const inputList = document.getElementById('inputList');
+    const rankList = document.getElementById('rankList');
+    const saveButton = document.getElementById('saveButton');
+    const resultBox = document.getElementById('resultBox');
+    let dragged;
+    let isLocked = false;
 
-generateButton.onclick = () => {
-  const items = inputList.value.trim().split('\n').filter(x => x.trim() !== '');
-  rankList.innerHTML = '';
-  if (items.length === 0) return;
-  items.forEach(text => {
-    const li = document.createElement('li');
-    li.textContent = text;
-    li.draggable = true;
-    rankList.appendChild(li);
-  });
-  saveButton.style.display = 'block';
-  resultBox.style.display = 'none';
-};
+    // Fix placeholder newline issue
+    inputList.placeholder = "Es:\nItalia\nSvezia\nFrancia\nCroazia";
 
-rankList.addEventListener('dragstart', e => {
-  if (e.target.tagName === 'LI') {
-    dragged = e.target;
-    e.target.classList.add('dragging');
-  }
-});
+    generateButton.onclick = () => {
+      const items = inputList.value.trim().split('\n').filter(x => x.trim() !== '');
+      rankList.innerHTML = '';
+      resultBox.style.display = 'none';
+      resultBox.innerHTML = '';
+      isLocked = false; // Reset lock state
+      saveButton.disabled = false;
 
-rankList.addEventListener('dragend', e => {
-  e.target.classList.remove('dragging');
-});
+      if (items.length === 0) return;
 
-rankList.addEventListener('dragover', e => {
-  e.preventDefault();
-  const target = e.target;
-  if (target.tagName === 'LI' && target !== dragged) {
-    target.classList.add('drag-over');
-  }
-});
+      items.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        li.draggable = true;
+        rankList.appendChild(li);
+      });
 
-rankList.addEventListener('dragleave', e => {
-  if (e.target.tagName === 'LI') {
-    e.target.classList.remove('drag-over');
-  }
-});
+      saveButton.style.display = 'block';
+      // Scroll to list
+      rankList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
-rankList.addEventListener('drop', e => {
-  e.preventDefault();
-  if (e.target.tagName === 'LI' && e.target !== dragged) {
-    const items = Array.from(rankList.children);
-    const draggedIndex = items.indexOf(dragged);
-    const targetIndex = items.indexOf(e.target);
-    e.target.classList.remove('drag-over');
-    if (draggedIndex < targetIndex)
-      e.target.after(dragged);
-    else
-      e.target.before(dragged);
-  }
-});
+    rankList.addEventListener('dragstart', e => {
+      if (isLocked) {
+        e.preventDefault();
+        return;
+      }
+      if (e.target.tagName === 'LI') {
+        dragged = e.target;
+        e.target.classList.add('dragging');
+      }
+    });
 
-saveButton.onclick = () => {
-  const finalOrder = Array.from(rankList.children).map(li => li.textContent);
-  resultBox.innerHTML = `<h3>Ordine finale:</h3><ol>${finalOrder.map(x => `<li>${x}</li>`).join('')}</ol>`;
-  resultBox.style.display = 'block';
-};
+    rankList.addEventListener('dragend', e => {
+      if (e.target.tagName === 'LI') {
+        e.target.classList.remove('dragging');
+      }
+    });
 
-// Supporto touch per mobile
-document.addEventListener('touchstart', e => {
-  if (e.target.tagName === 'LI') {
-    dragged = e.target;
-    e.target.classList.add('dragging');
-  }
-});
+    rankList.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (isLocked) return;
 
-document.addEventListener('touchmove', e => {
-  const touch = e.touches[0];
-  const element = document.elementFromPoint(touch.clientX, touch.clientY);
-  if (element && element.tagName === 'LI' && element !== dragged) {
-    const items = Array.from(rankList.children);
-    const draggedIndex = items.indexOf(dragged);
-    const targetIndex = items.indexOf(element);
-    if (draggedIndex < targetIndex)
-      element.after(dragged);
-    else
-      element.before(dragged);
-  }
-});
+      const target = e.target;
+      if (target.tagName === 'LI' && target !== dragged) {
+        target.classList.add('drag-over');
+      }
+    });
 
-document.addEventListener('touchend', e => {
-  if (dragged) dragged.classList.remove('dragging');
-  dragged = null;
-});
-</script>
+    rankList.addEventListener('dragleave', e => {
+      if (e.target.tagName === 'LI') {
+        e.target.classList.remove('drag-over');
+      }
+    });
+
+    rankList.addEventListener('drop', e => {
+      e.preventDefault();
+      if (isLocked) return;
+
+      if (e.target.tagName === 'LI' && e.target !== dragged) {
+        const items = Array.from(rankList.children);
+        const draggedIndex = items.indexOf(dragged);
+        const targetIndex = items.indexOf(e.target);
+        e.target.classList.remove('drag-over');
+
+        if (draggedIndex < targetIndex)
+          e.target.after(dragged);
+        else
+          e.target.before(dragged);
+      }
+    });
+
+    saveButton.onclick = () => {
+      isLocked = true;
+      saveButton.disabled = true;
+
+      const listItems = Array.from(rankList.children);
+      const finalOrder = listItems.map(li => {
+        li.draggable = false;
+        li.classList.add('locked');
+        return li.textContent;
+      });
+
+      resultBox.innerHTML = `<h3>Ordine finale:</h3><ol>${finalOrder.map(x => `<li>${x}</li>`).join('')}</ol>`;
+      resultBox.style.display = 'block';
+      resultBox.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Supporto touch per mobile
+    document.addEventListener('touchstart', e => {
+      if (isLocked) return;
+      if (e.target.tagName === 'LI') {
+        dragged = e.target;
+        e.target.classList.add('dragging');
+      }
+    }, { passive: false });
+
+    document.addEventListener('touchmove', e => {
+      if (isLocked) return;
+      if (!dragged) return;
+
+      e.preventDefault(); // Prevent scrolling while dragging
+
+      const touch = e.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+      if (element && element.tagName === 'LI' && element !== dragged && rankList.contains(element)) {
+        const items = Array.from(rankList.children);
+        const draggedIndex = items.indexOf(dragged);
+        const targetIndex = items.indexOf(element);
+
+        if (draggedIndex < targetIndex)
+          element.after(dragged);
+        else
+          element.before(dragged);
+      }
+    }, { passive: false });
+
+    document.addEventListener('touchend', e => {
+      if (dragged) {
+        dragged.classList.remove('dragging');
+        dragged = null;
+      }
+    });
+  </script>
 </body>
+
 </html>
